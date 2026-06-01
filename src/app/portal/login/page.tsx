@@ -30,12 +30,26 @@ export default function PortalLogin() {
         // Oturum bilgisini kaydet
         sessionStorage.setItem("active_tcNo", tcNo);
 
+        // IP Adresi ve Cihaz Bilgisini Al (Mevzuat Uyumu İçin)
+        let ipAdresi = "Bilinmiyor";
+        try {
+          const res = await fetch("https://api.ipify.org?format=json");
+          const data = await res.json();
+          ipAdresi = data.ip;
+        } catch (ipErr) {
+          console.error("IP alınamadı:", ipErr);
+        }
+        
+        const cihazTuru = typeof window !== "undefined" ? window.navigator.userAgent : "Bilinmiyor";
+
         // Sisteme giriş logu oluştur (Yönetmelik gereği)
         try {
           await addDoc(collection(db, "sistem_giris_loglari"), {
             tcNo,
             girisZamani: new Date().toISOString(),
-            platform: "Calisan Portali"
+            platform: "Calisan Portali",
+            ipAdresi,
+            cihazTuru
           });
         } catch (logErr) {
           console.error("Log yazılamadı:", logErr);

@@ -254,6 +254,7 @@ export default function RaporlarPage() {
                   <th className="p-4 font-semibold">Video İlerlemesi</th>
                   <th className="p-4 font-semibold">Sınav / Başarı</th>
                   <th className="p-4 font-semibold">Son Giriş</th>
+                  <th className="p-4 font-semibold">Sertifika</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
@@ -289,6 +290,31 @@ export default function RaporlarPage() {
                       )}
                     </td>
                     <td className="p-4 text-slate-500">{log.sonGiris}</td>
+                    <td className="p-4">
+                      {(log.tamamlandi || log.tamamlamaOrani >= 99) ? (
+                        <button 
+                          onClick={() => {
+                            import("@/lib/pdfGenerator").then(({ generateCertificate }) => {
+                              generateCertificate({
+                                adSoyad: log.adSoyad,
+                                tcNo: log.tcNo,
+                                egitimAdi: log.egitimAdi,
+                                tarih: new Date().toLocaleDateString("tr-TR"),
+                                puan: log.sinavSkoru
+                              });
+                            });
+                          }}
+                          className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                          </svg>
+                          Sertifika
+                        </button>
+                      ) : (
+                        <span className="text-slate-400 text-xs">Tamamlanmadı</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

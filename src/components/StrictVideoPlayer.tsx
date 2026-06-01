@@ -20,12 +20,27 @@ export default function StrictVideoPlayer({ src, egitimId, tcNo, onComplete }: S
   const [showCheckpoint, setShowCheckpoint] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [ipAdresi, setIpAdresi] = useState("Bilinmiyor");
+  const [cihazTuru, setCihazTuru] = useState("Bilinmiyor");
 
   // Firebase Log Key
   const logDocId = `${egitimId}_${tcNo}`;
 
-  // 1. Firebase'den önceki kayıtları getir
+  // 1. Firebase'den önceki kayıtları ve Cihaz/IP Bilgisini getir
   useEffect(() => {
+    // IP ve Cihaz bilgisini al
+    const fetchIp = async () => {
+       try {
+         const res = await fetch("https://api.ipify.org?format=json");
+         const data = await res.json();
+         setIpAdresi(data.ip);
+       } catch (err) {
+         console.error("IP alınamadı", err);
+       }
+    };
+    fetchIp();
+    setCihazTuru(typeof window !== "undefined" ? window.navigator.userAgent : "Bilinmiyor");
+
     const fetchProgress = async () => {
       try {
         const docRef = doc(db, "egitim_loglari", logDocId);
@@ -80,7 +95,9 @@ export default function StrictVideoPlayer({ src, egitimId, tcNo, onComplete }: S
             tcNo,
             maxWatchedTime,
             tamamlamaOrani: duration > 0 ? (maxWatchedTime / duration) * 100 : 0,
-            sonGiris: new Date().toISOString()
+            sonGiris: new Date().toISOString(),
+            ipAdresi,
+            cihazTuru
           }, { merge: true });
         } catch (err) {
           console.error("Log kaydedilemedi", err);
@@ -89,7 +106,7 @@ export default function StrictVideoPlayer({ src, egitimId, tcNo, onComplete }: S
     }, 10000); // 10 saniyede bir
 
     return () => clearInterval(interval);
-  }, [isPlaying, maxWatchedTime, duration, egitimId, tcNo, logDocId]);
+  }, [isPlaying, maxWatchedTime, duration, egitimId, tcNo, logDocId, ipAdresi, cihazTuru]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
