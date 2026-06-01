@@ -184,6 +184,48 @@ export default function StrictVideoPlayer({ src, egitimId, tcNo, onComplete }: S
               </svg>
             )}
           </button>
+          
+          <div className="flex items-center gap-2 group/volume relative">
+             <button 
+                onClick={() => {
+                   if (videoRef.current) {
+                      videoRef.current.muted = !videoRef.current.muted;
+                      // Force a re-render to update the icon
+                      setDuration(prev => prev + 0.00001); // hacky way to force re-render for muted state without adding new state if we don't want to
+                   }
+                }} 
+                className="hover:text-blue-400 transition-colors"
+             >
+                {videoRef.current?.muted || videoRef.current?.volume === 0 ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                      <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06ZM17.78 6.22a.75.75 0 1 0-1.06 1.06L18.44 9l-1.72 1.72a.75.75 0 1 0 1.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 1 0 1.06-1.06L20.56 9l1.72-1.72a.75.75 0 1 0-1.06-1.06l-1.72 1.72-1.72-1.72Z" />
+                    </svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                      <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06ZM18.584 5.106a.75.75 0 0 1 1.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 0 1-1.06-1.06 8.25 8.25 0 0 0 0-11.668.75.75 0 0 1 0-1.06Z" />
+                      <path d="M15.932 7.757a.75.75 0 0 1 1.061 0 6 6 0 0 1 0 8.486.75.75 0 0 1-1.06-1.061 4.5 4.5 0 0 0 0-6.364.75.75 0 0 1 0-1.06Z" />
+                    </svg>
+                )}
+             </button>
+             {/* Ses Çubuğu */}
+             <div className="w-0 overflow-hidden group-hover/volume:w-24 transition-all duration-300 ease-in-out flex items-center">
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1" 
+                  step="0.05"
+                  defaultValue="1"
+                  onChange={(e) => {
+                     if (videoRef.current) {
+                        videoRef.current.volume = parseFloat(e.target.value);
+                        videoRef.current.muted = parseFloat(e.target.value) === 0;
+                        setDuration(prev => prev + 0.00001); // trigger re-render
+                     }
+                  }}
+                  className="w-20 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+             </div>
+          </div>
 
           <div className="flex-1 flex items-center gap-2">
             <span className="text-xs font-medium w-10 text-right">{formatTime(currentTime)}</span>
