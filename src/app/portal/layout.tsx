@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { doc, updateDoc } from "firebase/firestore";
@@ -11,6 +12,36 @@ export default function PortalLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const activeLogId = sessionStorage.getItem("active_log_id");
+      if (!activeLogId) return;
+
+      if (document.visibilityState === "hidden") {
+        // Kullanıcı sekmeyi kapattı, sayfayı yeniledi veya arka plana aldı
+        const payload = JSON.stringify({ logId: activeLogId, action: "exit" });
+        navigator.sendBeacon("/api/log-exit", payload);
+      } else if (document.visibilityState === "visible") {
+        // Kullanıcı sekmeye geri döndü
+        fetch("/api/log-exit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ logId: activeLogId, action: "return" }),
+          keepalive: true
+        }).catch(err => console.error("Return log err:", err));
+      }
+    };
+
+    window.addEventListener("visibilitychange", handleVisibilityChange);
+    // Safari ve iOS için pagehide ek önlemi
+    window.addEventListener("pagehide", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handleVisibilityChange);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
