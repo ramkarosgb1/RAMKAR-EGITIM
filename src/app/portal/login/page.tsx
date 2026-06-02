@@ -27,6 +27,20 @@ export default function PortalLogin() {
       const querySnapshot = await getDocs(q);
       
       if (!querySnapshot.empty) {
+        
+        // 2. Personelin atanmış eğitimi var mı kontrol et
+        const egitimlerQuery = query(
+          collection(db, "egitimler"),
+          where("atananPersoneller", "array-contains", tcNo)
+        );
+        const egitimlerSnap = await getDocs(egitimlerQuery);
+
+        if (egitimlerSnap.empty) {
+          setError("Size atanmış herhangi bir eğitim bulunmamaktadır. Lütfen İSG yetkilinizle iletişime geçin.");
+          setLoading(false);
+          return;
+        }
+
         // Oturum bilgisini kaydet
         sessionStorage.setItem("active_tcNo", tcNo);
 

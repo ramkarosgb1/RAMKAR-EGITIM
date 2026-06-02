@@ -86,6 +86,7 @@ export default function EgitimlerPage() {
                     <td className="px-6 py-4 text-slate-500">{egitim.sure}</td>
                     <td className="px-6 py-4 text-slate-500">{egitim.izlenme || 0} kişi</td>
                     <td className="px-6 py-4 text-right space-x-3">
+                      <Link href={`/admin/egitimler/${egitim.id}/ata`} className="text-emerald-600 hover:text-emerald-800 font-medium">Eğitim Ata</Link>
                       <button className="text-indigo-600 hover:text-indigo-800 font-medium">Düzenle</button>
                       <button onClick={() => handleSil(egitim.id)} className="text-red-600 hover:text-red-800 font-medium">Sil</button>
                     </td>

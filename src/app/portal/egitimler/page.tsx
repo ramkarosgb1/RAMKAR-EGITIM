@@ -49,8 +49,12 @@ export default function CalisanEgitimleriPage() {
            userLogs[doc.data().egitimId] = doc.data();
         });
 
-        // 3. Eğitimleri al
-        const querySnapshot = await getDocs(collection(db, "egitimler"));
+        // 3. Eğitimleri al (Sadece atananlar)
+        const egitimlerQuery = query(
+          collection(db, "egitimler"),
+          where("atananPersoneller", "array-contains", storedTc)
+        );
+        const querySnapshot = await getDocs(egitimlerQuery);
         const egitimlerData = querySnapshot.docs.map(doc => {
           const log = userLogs[doc.id];
           let durum = "baslamadi";

@@ -17,61 +17,100 @@ export default function CanliTakipPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // 1. Personelleri ve Eğitimleri Çek
+        // 1. Tüm Eğitimleri ve Atamaları Çek
+        const egitimlerSnap = await getDocs(collection(db, "egitimler"));
+        const egitimlerMap: Record<string, string> = {};
+        const atananPersonelTcSet = new Set<string>();
+        const egitimAtamalari: { egitimId: string, egitimAdi: string, tcNo: string }[] = [];
+
+        egitimlerSnap.forEach((doc) => {
+          const data = doc.data();
+          egitimlerMap[doc.id] = data.baslik || "Bilinmeyen Eğitim";
+          const atananlar = data.atananPersoneller || [];
+          atananlar.forEach((tc: string) => {
+             atananPersonelTcSet.add(tc);
+             egitimAtamalari.push({ egitimId: doc.id, egitimAdi: data.baslik, tcNo: tc });
+          });
+        });
+
+        // 2. Personelleri Çek (Sadece ataması olanlar)
         const personellerSnap = await getDocs(collection(db, "personeller"));
         const personellerMap: Record<string, string> = {};
         const tempPersoneller: any[] = [];
+        
         personellerSnap.forEach((doc) => {
           const data = doc.data();
           if (data.tcNo) {
             personellerMap[data.tcNo] = `${data.ad || ''} ${data.soyad || ''}`.trim();
-            tempPersoneller.push({ id: doc.id, ...data, tamamlananEgitimSayisi: 0, sonDurum: "Bekliyor" });
-          }
-        });
-
-        const egitimlerSnap = await getDocs(collection(db, "egitimler"));
-        const egitimlerMap: Record<string, string> = {};
-        egitimlerSnap.forEach((doc) => {
-          egitimlerMap[doc.id] = doc.data().baslik || "Bilinmeyen Eğitim";
-        });
-
-        // 2. Tüm Eğitim Loglarını Çekip Özete Bağla
-        const eLogsSnap = await getDocs(collection(db, "egitim_loglari"));
-        const tempELogs: any[] = [];
-        
-        eLogsSnap.forEach((doc) => {
-          const data = doc.data();
-          const pTc = data.tcNo || "Hatalı_Kayıt";
-          
-          const isCompleted = data.tamamlandi || data.tamamlamaOrani >= 99 || data.sinavSkoru >= 70;
-          
-          if (isCompleted && pTc !== "Hatalı_Kayıt") {
-            const pIndex = tempPersoneller.findIndex(p => p.tcNo === pTc);
-            if (pIndex !== -1) {
-              tempPersoneller[pIndex].tamamlananEgitimSayisi += 1;
-              tempPersoneller[pIndex].sonDurum = "Eğitim Aldı";
+            // Sadece atanmış personelleri listeye ekle
+            if (atananPersonelTcSet.has(data.tcNo)) {
+               tempPersoneller.push({ id: doc.id, ...data, tamamlananEgitimSayisi: 0, sonDurum: "Bekliyor" });
             }
           }
+        });
 
-          if (activeTab === "egitim" && egitimLogs.length === 0) {
-            tempELogs.push({
-              id: doc.id,
-              tcNo: data.tcNo || "Hatalı Kayıt (TC Yok)",
-              adSoyad: data.tcNo ? (personellerMap[data.tcNo] || "Bilinmeyen Personel") : "Eksik Kayıt",
-              egitimAdi: egitimlerMap[data.egitimId] || data.egitimId || "Bilinmeyen Eğitim",
-              tamamlamaOrani: Math.min(Math.round(data.tamamlamaOrani || 0), 100),
-              sonGiris: data.sonGiris ? new Date(data.sonGiris).toLocaleString("tr-TR") : "-",
-              sinavSkoru: data.sinavSkoru ?? "-",
-              basariDurumu: data.basariDurumu || "Girmedi",
-              tamamlandi: data.tamamlandi || false
-            });
-          }
+        // 3. Tüm Eğitim Loglarını Çekip Özete ve Atamalara Bağla
+        const eLogsSnap = await getDocs(collection(db, "egitim_loglari"));
+        const logsMap: Record<string, any> = {};
+        eLogsSnap.forEach((doc) => {
+           const data = doc.data();
+           logsMap[`${data.tcNo}_${data.egitimId}`] = { id: doc.id, ...data };
+        });
+
+        const tempELogs: any[] = [];
+        
+        egitimAtamalari.forEach((atama, idx) => {
+           const logData = logsMap[`${atama.tcNo}_${atama.egitimId}`];
+           const pIndex = tempPersoneller.findIndex(p => p.tcNo === atama.tcNo);
+
+           if (logData) {
+              const isCompleted = logData.tamamlandi || logData.tamamlamaOrani >= 99 || logData.sinavSkoru >= 70;
+              if (isCompleted && pIndex !== -1) {
+                 tempPersoneller[pIndex].tamamlananEgitimSayisi += 1;
+                 tempPersoneller[pIndex].sonDurum = "Eğitim Aldı";
+              }
+              
+              if (activeTab === "egitim" && egitimLogs.length === 0) {
+                 tempELogs.push({
+                   id: logData.id,
+                   tcNo: atama.tcNo,
+                   adSoyad: personellerMap[atama.tcNo] || "Bilinmeyen Personel",
+                   egitimAdi: atama.egitimAdi,
+                   tamamlamaOrani: Math.min(Math.round(logData.tamamlamaOrani || 0), 100),
+                   sonGiris: logData.sonGiris ? new Date(logData.sonGiris).toLocaleString("tr-TR") : "-",
+                   sinavSkoru: logData.sinavSkoru ?? "-",
+                   basariDurumu: logData.basariDurumu || "Girmedi",
+                   tamamlandi: logData.tamamlandi || false
+                 });
+              }
+           } else {
+              // Atanmış ama hiç başlamamış (log kaydı yok)
+              if (activeTab === "egitim" && egitimLogs.length === 0) {
+                 tempELogs.push({
+                   id: `unstarted_${idx}`,
+                   tcNo: atama.tcNo,
+                   adSoyad: personellerMap[atama.tcNo] || "Bilinmeyen Personel",
+                   egitimAdi: atama.egitimAdi,
+                   tamamlamaOrani: 0,
+                   sonGiris: "-",
+                   sinavSkoru: "-",
+                   basariDurumu: "Başlamadı",
+                   tamamlandi: false
+                 });
+              }
+           }
         });
 
         setPersonellerList(tempPersoneller.sort((a, b) => b.tamamlananEgitimSayisi - a.tamamlananEgitimSayisi));
 
         if (activeTab === "egitim" && egitimLogs.length === 0) {
-          tempELogs.sort((a, b) => b.sonGiris.localeCompare(a.sonGiris));
+          // Önce son giriş yapılanlar, sonra hiç başlamayanlar
+          tempELogs.sort((a, b) => {
+            if (a.sonGiris === "-" && b.sonGiris === "-") return 0;
+            if (a.sonGiris === "-") return 1;
+            if (b.sonGiris === "-") return -1;
+            return b.sonGiris.localeCompare(a.sonGiris);
+          });
           setEgitimLogs(tempELogs);
         }
 
