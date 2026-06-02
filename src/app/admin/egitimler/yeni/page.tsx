@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 
@@ -19,7 +20,37 @@ export default function YeniEgitimPage() {
   
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [epostaBildirim, setEpostaBildirim] = useState(true);
   const router = useRouter();
+
+  const handleEpostaGonderim = async (egitimBaslik: string) => {
+    try {
+      const personellerSnap = await getDocs(collection(db, "personeller"));
+      const personeller: any[] = [];
+      personellerSnap.forEach(doc => {
+        const data = doc.data();
+        // Sadece TC'si olan personelleri alıyoruz (E-postası olmayanları API filtreleyecek)
+        if (data.tcNo) {
+          personeller.push({
+            ad: data.ad || "",
+            soyad: data.soyad || "",
+            tcNo: data.tcNo,
+            eposta: data.eposta || data.email || ""
+          });
+        }
+      });
+
+      if (personeller.length > 0) {
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ egitimBaslik, personeller })
+        });
+      }
+    } catch (err) {
+      console.error("E-posta gönderim hatası:", err);
+    }
+  };
 
   const handleKaydet = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +97,12 @@ export default function YeniEgitimPage() {
               olusturulmaTarihi: serverTimestamp()
             });
             
-            alert("Eğitim başarıyla yüklendi ve eklendi!");
+            // 4. E-posta Gönderimi
+            if (epostaBildirim) {
+              await handleEpostaGonderim(baslik);
+            }
+
+            alert("Eğitim başarıyla yüklendi, eklendi ve bildirimler gönderildi!");
             router.push("/admin/egitimler");
           }
         );
@@ -80,7 +116,12 @@ export default function YeniEgitimPage() {
           olusturulmaTarihi: serverTimestamp()
         });
         
-        alert("Eğitim başarıyla eklendi!");
+        // E-posta Gönderimi
+        if (epostaBildirim) {
+          await handleEpostaGonderim(baslik);
+        }
+
+        alert("Eğitim başarıyla eklendi ve bildirimler gönderildi!");
         router.push("/admin/egitimler");
       }
     } catch (error) {
@@ -206,13 +247,33 @@ export default function YeniEgitimPage() {
               </div>
             )}
 
+            <div className="flex items-center gap-3 pt-2">
+              <input
+                type="checkbox"
+                id="epostaBildirim"
+                checked={epostaBildirim}
+                onChange={(e) => setEpostaBildirim(e.target.checked)}
+                className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+              />
+              <label htmlFor="epostaBildirim" className="text-sm font-medium text-slate-700">
+                Tüm personellere eğitim atandığına dair otomatik e-posta gönder
+              </label>
+            </div>
+
             <div className="pt-4 border-t border-slate-100 flex justify-end">
               <button
                 type="submit"
                 disabled={loading}
                 className="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-2"
               >
-                {loading ? "Kaydediliyor..." : "Eğitimi Kaydet"}
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    İşleniyor...
+                  </>
+                ) : (
+                  "Eğitimi Kaydet"
+                )}
               </button>
             </div>
           </form>
