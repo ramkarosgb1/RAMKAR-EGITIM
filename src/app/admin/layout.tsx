@@ -18,8 +18,11 @@ export default function AdminLayout({
                 <a href="/admin/egitimler" className="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                   Eğitimler
                 </a>
+                <a href="/admin/takip" className="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Canlı Takip & Loglar
+                </a>
                 <a href="/admin/raporlar" className="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                  Raporlar & Loglar
+                  Dışa Aktar (Excel)
                 </a>
               </div>
             </div>
