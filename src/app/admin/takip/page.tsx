@@ -87,6 +87,7 @@ export default function CanliTakipPage() {
               tcNo: data.tcNo || "Bilinmiyor",
               adSoyad: data.tcNo ? (personellerMap[data.tcNo] || "Bilinmeyen Personel") : "Eksik Kayıt",
               girisZamani: data.girisZamani ? new Date(data.girisZamani).toLocaleString("tr-TR") : "-",
+              cikisZamani: data.cikisZamani ? new Date(data.cikisZamani).toLocaleString("tr-TR") : "Sistemde",
               platform: data.platform || "-",
               ipAdresi: data.ipAdresi || "Bilinmiyor",
               cihazTuru: data.cihazTuru || "Bilinmiyor"
@@ -156,7 +157,7 @@ export default function CanliTakipPage() {
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h3 className="text-lg font-bold text-slate-900">
             {activeTab === "egitim" && "Canlı Eğitim Durum Tablosu"}
-            {activeTab === "giris" && "Sistem Giriş Logları (Son 100 Kayıt)"}
+            {activeTab === "giris" && "Sistem Giriş/Çıkış Logları (Son 100 Kayıt)"}
             {activeTab === "ozet" && "Tüm Personeller ve Eğitim Başarı Durumları"}
           </h3>
           <div className="text-sm text-slate-500">Son Güncelleme: {new Date().toLocaleTimeString('tr-TR')}</div>
@@ -300,7 +301,8 @@ export default function CanliTakipPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 text-slate-600 text-sm border-b border-slate-200">
-                    <th className="p-4 font-semibold">Tarih / Saat</th>
+                    <th className="p-4 font-semibold">Giriş Saati</th>
+                    <th className="p-4 font-semibold">Çıkış Saati</th>
                     <th className="p-4 font-semibold">Personel</th>
                     <th className="p-4 font-semibold">TC Kimlik</th>
                     <th className="p-4 font-semibold">IP Adresi</th>
@@ -311,6 +313,11 @@ export default function CanliTakipPage() {
                   {girisLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-4 font-medium text-slate-700">{log.girisZamani}</td>
+                      <td className="p-4">
+                        <span className={`inline-flex px-2 py-1 rounded-md text-xs font-medium ${log.cikisZamani === 'Sistemde' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                          {log.cikisZamani}
+                        </span>
+                      </td>
                       <td className="p-4 font-medium text-slate-900">{log.adSoyad}</td>
                       <td className="p-4 text-slate-500">{log.tcNo}</td>
                       <td className="p-4 text-slate-700 font-mono text-xs">{log.ipAdresi}</td>

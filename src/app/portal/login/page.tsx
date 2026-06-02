@@ -44,13 +44,15 @@ export default function PortalLogin() {
 
         // Sisteme giriş logu oluştur (Yönetmelik gereği)
         try {
-          await addDoc(collection(db, "sistem_giris_loglari"), {
+          const docRef = await addDoc(collection(db, "sistem_giris_loglari"), {
             tcNo,
             girisZamani: new Date().toISOString(),
+            cikisZamani: null,
             platform: "Calisan Portali",
             ipAdresi,
             cihazTuru
           });
+          sessionStorage.setItem("active_log_id", docRef.id);
         } catch (logErr) {
           console.error("Log yazılamadı:", logErr);
         }

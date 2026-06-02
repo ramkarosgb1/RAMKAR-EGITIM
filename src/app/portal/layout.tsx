@@ -1,10 +1,36 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function PortalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const activeLogId = sessionStorage.getItem("active_log_id");
+      if (activeLogId) {
+        // Çıkış zamanını kaydet
+        await updateDoc(doc(db, "sistem_giris_loglari", activeLogId), {
+          cikisZamani: new Date().toISOString()
+        });
+      }
+    } catch (err) {
+      console.error("Çıkış logu yazılamadı:", err);
+    } finally {
+      // Temizlik ve yönlendirme
+      sessionStorage.removeItem("active_tcNo");
+      sessionStorage.removeItem("active_log_id");
+      router.push("/portal/login");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <nav className="bg-white border-b border-slate-200">
@@ -23,6 +49,15 @@ export default function PortalLayout({
                 </svg>
                 Ana Sayfa
               </Link>
+              <button 
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                </svg>
+                Çıkış Yap
+              </button>
             </div>
           </div>
         </div>
