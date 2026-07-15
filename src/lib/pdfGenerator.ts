@@ -6,6 +6,9 @@ interface CertificateData {
   egitimAdi: string;
   tarih: string;
   puan?: string | number;
+  uzmanAd?: string;
+  doktorAd?: string;
+  isverenAd?: string;
 }
 
 export const generateCertificate = (data: CertificateData) => {
@@ -75,14 +78,37 @@ export const generateCertificate = (data: CertificateData) => {
     doc.text(`Sinav Basari Skoru: ${data.puan} / 100`, width / 2, 155, { align: "center" });
   }
 
+  doc.text(`Duzenlenme Tarihi: ${data.tarih}`, 30, height - 40);
+  
   // Footer / Signatures
-  doc.setFontSize(12);
-  doc.setTextColor(100, 116, 139);
-  
-  doc.text(`Duzenlenme Tarihi: ${data.tarih}`, 30, height - 30);
-  
-  doc.text("Egitim Kurumu Yetkilisi", width - 30, height - 40, { align: "right" });
-  doc.text("RAMKAR OSGB", width - 30, height - 30, { align: "right" });
+  doc.setFontSize(10);
+  doc.setTextColor(15, 23, 42);
+
+  const uzman = data.uzmanAd || "Is Guvenligi Uzmani";
+  const doktor = data.doktorAd || "Isyeri Hekimi";
+  const isveren = data.isverenAd || "Isveren / Vekili";
+
+  // Left - Isveren
+  doc.text(isveren, 50, height - 25, { align: "center" });
+  doc.setFontSize(8);
+  doc.setTextColor(22, 163, 74); // Green for e-sign
+  doc.text("(e-Imzalidir)", 50, height - 20, { align: "center" });
+
+  // Middle - Doktor
+  doc.setFontSize(10);
+  doc.setTextColor(15, 23, 42);
+  doc.text(doktor, width / 2, height - 25, { align: "center" });
+  doc.setFontSize(8);
+  doc.setTextColor(22, 163, 74);
+  doc.text("(e-Imzalidir)", width / 2, height - 20, { align: "center" });
+
+  // Right - Uzman
+  doc.setFontSize(10);
+  doc.setTextColor(15, 23, 42);
+  doc.text(uzman, width - 50, height - 25, { align: "center" });
+  doc.setFontSize(8);
+  doc.setTextColor(22, 163, 74);
+  doc.text("(e-Imzalidir)", width - 50, height - 20, { align: "center" });
 
   // Download the PDF
   doc.save(`Sertifika_${data.tcNo}_${data.tarih.replace(/\./g, '')}.pdf`);

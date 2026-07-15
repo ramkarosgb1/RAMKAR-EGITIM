@@ -12,11 +12,19 @@ export default function CanliTakipPage() {
   const [egitimLogs, setEgitimLogs] = useState<any[]>([]);
   const [girisLogs, setGirisLogs] = useState<any[]>([]);
   const [personellerList, setPersonellerList] = useState<any[]>([]);
+  const [sertifikaAyarlari, setSertifikaAyarlari] = useState<any>({});
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Fetch Certificate Settings
+        const { doc: firestoreDoc, getDoc: firestoreGetDoc } = await import("firebase/firestore");
+        const settingsDoc = await firestoreGetDoc(firestoreDoc(db, "settings", "sertifika"));
+        if (settingsDoc.exists()) {
+          setSertifikaAyarlari(settingsDoc.data());
+        }
+
         // 1. Tüm Eğitimleri ve Atamaları Çek
         const egitimlerSnap = await getDocs(collection(db, "egitimler"));
         const egitimlerMap: Record<string, string> = {};
@@ -267,7 +275,10 @@ export default function CanliTakipPage() {
                                   tcNo: log.tcNo,
                                   egitimAdi: log.egitimAdi,
                                   tarih: new Date().toLocaleDateString("tr-TR"),
-                                  puan: log.sinavSkoru !== "-" ? log.sinavSkoru : 100
+                                  puan: log.sinavSkoru !== "-" ? log.sinavSkoru : 100,
+                                  uzmanAd: sertifikaAyarlari.uzmanAd,
+                                  doktorAd: sertifikaAyarlari.doktorAd,
+                                  isverenAd: sertifikaAyarlari.isverenAd
                                 });
                               });
                             }}

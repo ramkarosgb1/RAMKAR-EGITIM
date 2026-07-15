@@ -21,6 +21,7 @@ export default function CalisanEgitimleriPage() {
   const [loading, setLoading] = useState(true);
   const [adSoyad, setAdSoyad] = useState("");
   const [tcNo, setTcNo] = useState("");
+  const [sertifikaAyarlari, setSertifikaAyarlari] = useState<any>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -39,6 +40,13 @@ export default function CalisanEgitimleriPage() {
         if (!pSnap.empty) {
            const pData = pSnap.docs[0].data();
            setAdSoyad(`${pData.ad || ''} ${pData.soyad || ''}`.trim());
+        }
+
+        // Sertifika Ayarlarını Al
+        const { doc: firestoreDoc, getDoc: firestoreGetDoc } = await import("firebase/firestore");
+        const settingsDoc = await firestoreGetDoc(firestoreDoc(db, "settings", "sertifika"));
+        if (settingsDoc.exists()) {
+          setSertifikaAyarlari(settingsDoc.data());
         }
 
         // 2. Eğitim Loglarını al
@@ -146,7 +154,10 @@ export default function CalisanEgitimleriPage() {
                             tcNo: tcNo,
                             egitimAdi: egitim.baslik,
                             tarih: new Date().toLocaleDateString("tr-TR"),
-                            puan: egitim.sinavSkoru
+                            puan: egitim.sinavSkoru,
+                            uzmanAd: sertifikaAyarlari?.uzmanAd,
+                            doktorAd: sertifikaAyarlari?.doktorAd,
+                            isverenAd: sertifikaAyarlari?.isverenAd
                           });
                         });
                       }}

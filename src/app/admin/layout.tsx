@@ -24,6 +24,9 @@ export default function AdminLayout({
                 <a href="/admin/raporlar" className="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                   Dışa Aktar (Excel)
                 </a>
+                <a href="/admin/sertifika" className="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Sertifika Ayarları
+                </a>
               </div>
             </div>
             <div className="flex items-center space-x-4">
