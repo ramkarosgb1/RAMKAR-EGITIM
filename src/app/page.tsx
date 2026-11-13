@@ -6,13 +6,14 @@ export default function Home() {
       <div className="max-w-2xl w-full text-center space-y-8">
         <div className="space-y-4">
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">
-            OSGB Uzaktan Eğitim
+            RAMKAR İSG Uzaktan Eğitim
           </h1>
           <p className="text-lg text-slate-600">
-            Personel eğitimlerinizi tek bir merkezden yönetin, izleyin ve sertifikalandırın.
+            İSG eğitim içeriklerini inceleyin. Çalışan ve yönetici girişleri güvenli kimlik doğrulama tamamlanana kadar kapalıdır.
           </p>
         </div>
 
+        <div className="flex flex-wrap justify-center gap-3"><Link href="/icerik-onizleme" className="rounded-lg border border-indigo-300 px-5 py-3 font-semibold text-indigo-800">8 Saatlik İçerik Taslağı</Link><Link href="/deneme-sinavi" className="rounded-lg bg-indigo-700 px-5 py-3 font-semibold text-white">Deneme Sınavı</Link></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12">
           <Link 
             href="/portal"
