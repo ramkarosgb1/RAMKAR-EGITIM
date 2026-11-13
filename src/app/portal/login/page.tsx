@@ -17,6 +17,13 @@ export default function PortalLogin() {
     setError("");
     setLoading(true);
 
+    // Security gate: a national ID number is not an authentication credential.
+    // Do not query personal records or create sessions until verified authentication is implemented.
+    setError("Güvenli kimlik doğrulama hazırlanıyor. TC kimlik numarasıyla tek başına giriş geçici olarak kapatılmıştır. Lütfen yöneticinizle iletişime geçin.");
+    setLoading(false);
+    return;
+
+    /*
     try {
       // Sadece tcNo ile personeli bul
       const q = query(
@@ -81,6 +88,7 @@ export default function PortalLogin() {
     } finally {
       setLoading(false);
     }
+    */
   };
 
   return (
