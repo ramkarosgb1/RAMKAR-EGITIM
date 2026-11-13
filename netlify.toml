@@ -1,0 +1,11 @@
+# Netlify deployment configuration for Next.js 15
+# Connect this repository from https://app.netlify.com/start
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Next.js routing and server functions are handled by Netlify's Next.js integration.
+# Do not add a SPA catch-all redirect: it breaks Next.js server routes.
