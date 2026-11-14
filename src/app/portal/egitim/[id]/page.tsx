@@ -113,17 +113,6 @@ export default function EgitimIzlePage() {
               )
             )}
 
-            {/* Test amaçlı her zaman görünür sınava geçiş butonu */}
-            {!videoBitti && (
-              <div className="flex justify-end">
-                <button 
-                  onClick={() => setSinavBasladi(true)}
-                  className="text-sm font-medium text-slate-400 hover:text-white underline decoration-slate-600 transition-colors"
-                >
-                  (Geliştirici Testi) Videoyu Atla ve Sınava Geç
-                </button>
-              </div>
-            )}
           </div>
         ) : !sinavBitti ? (
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
