@@ -85,7 +85,7 @@ export default function EgitimIzlePage() {
             ) : (
               !videoBitti ? (
                 <StrictVideoPlayer 
-                  src={egitim.videoUrl || "https://www.w3schools.com/html/mov_bbb.mp4"}
+                  src={egitim.videoUrl || ""}
                   egitimId={egitim.id}
                   tcNo={tcNo}
                   onComplete={() => setVideoBitti(true)}
@@ -100,7 +100,7 @@ export default function EgitimIzlePage() {
                         </svg>
                       </div>
                       <h3 className="text-2xl font-bold text-white mb-2">Tebrikler!</h3>
-                      <p className="text-slate-300 mb-6">Eğitim videosunu yönetmeliklere uygun şekilde tamamladınız. Şimdi değerlendirme sınavına geçebilirsiniz.</p>
+                      <p className="text-slate-300 mb-6">Video sona erdi. Eğitim tamamlama kaydının sunucu tarafından doğrulanması gerekir.</p>
                       <button 
                         onClick={() => setSinavBasladi(true)}
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg shadow-blue-600/30"
